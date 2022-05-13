@@ -16,8 +16,34 @@ class Car{
     }
 
     update(roadBorders){
-        this.#move();
+        if(!this.damaged){
+            this.#move();
+            this.polygon = this.#createPolygon();
+            this.damaged = this.#assessDamage(roadBorders);
+        }
         this.sensor.update(roadBorders);
+    }
+
+    #assessDamage(roadBorders){
+        for(let i = 0; i < roadBorders.length; i++){
+            if(polysIntersect(this.polygon, roadBorders[i])){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    #createPolygon(){
+        const points = [];
+        const rad = Math.hypot(this.width, this.height/2);
+        const alpha = Math.atan2(this.width, this.height);
+        //create the four points of the rectangle
+        //switch to change shape of the car
+        points.push({x:this.x-Math.sin(this.angle-alpha)*rad,y:this.y-Math.cos(this.angle-alpha)*rad});
+        points.push({x:this.x-Math.sin(this.angle+alpha)*rad,y:this.y-Math.cos(this.angle+alpha)*rad});
+        points.push({x:this.x-Math.sin(Math.PI + this.angle-alpha)*rad,y:this.y-Math.cos(Math.PI + this.angle-alpha)*rad});
+        points.push({x:this.x-Math.sin(Math.PI + this.angle+alpha)*rad,y:this.y-Math.cos(Math.PI + this.angle+alpha)*rad});
+        return points;
     }
 
     #move(){
@@ -66,17 +92,18 @@ class Car{
     }
 
     draw(ctx){
-        ctx.save();
-        //move the context to the x and y positions
-        ctx.translate(this.x, this.y);
-        //rotate the context
-        ctx.rotate(-this.angle);
+        if(this.damaged){
+            ctx.fillStyle="gray";
+        } else {
+            ctx.fillStyle="black";
+        }
 
         ctx.beginPath();
-        ctx.rect(-this.width/2, -this.height/2, this.width, this.height);
+        ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
+        for(let i = 0; i < this.polygon.length; i++){
+            ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
+        }
         ctx.fill();
-
-        ctx.restore();
 
         //draw the sensor
         this.sensor.draw(ctx);

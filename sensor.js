@@ -50,18 +50,19 @@ class Sensor{
 
     draw(ctx){
         for(let i = 0; i < this.rayCount; i++){
+            //check if there is an intersection
             let end = this.rays[i][1];
             if(this.readings[i]){
                 end = this.readings[i];
             }
-
+            //draw yellow part of ray
             ctx.beginPath();
             ctx.lineWidth=2;
             ctx.strokeStyle = "yellow";
             ctx.moveTo(this.rays[i][0].x, this.rays[i][0].y);
             ctx.lineTo(end.x, end.y);
             ctx.stroke();
-
+            //draw black part of ray
             ctx.beginPath();
             ctx.lineWidth=2;
             ctx.strokeStyle = "black";
