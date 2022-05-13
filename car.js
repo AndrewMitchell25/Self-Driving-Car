@@ -15,6 +15,10 @@ class Car{
     }
 
     update(){
+        this.#move();
+    }
+
+    #move(){
         //use acceleration 
         if(this.controls.forward){
             this.speed += this.acceleration;
@@ -42,12 +46,18 @@ class Car{
         }
 
         //left and right controls
-        if(this.controls.left){
-            this.angle += 0.03;
+        //handle flipping right and left for reversing
+        if(this.speed != 0){
+            const flip = this.speed > 0 ? 1 : -1;
+            //change angle for left and right
+            if(this.controls.left){ 
+                this.angle += 0.03 * flip;
+            }
+            if(this.controls.right){
+                this.angle -= 0.03 * flip;
+            }
         }
-        if(this.controls.right){
-            this.angle -= 0.03;
-        }
+        
         //use unit circle to implement movement
         this.x -= Math.sin(this.angle)*this.speed;
         this.y -= Math.cos(this.angle)*this.speed;
