@@ -16,6 +16,11 @@ class Road{
         const topRight = {x:this.right, y:this.top};
         const bottomRight = {x:this.right, y:this.bottom};
         this.borders = [[topLeft, bottomLeft],[topRight, bottomRight]];
+        this.lanes = [];
+        for(let i=1; i <= this.laneCount-1; i++){
+            const x = lerp(this.left, this.right, i/this.laneCount);
+            this.lanes.push([{x:x, y:this.top}, {x:x, y:this.bottom}]);
+        }
     }
 
     getLaneCenter(laneIndex){
@@ -27,15 +32,14 @@ class Road{
         ctx.lineWidth = 5;
         ctx.strokeStyle = "white";
         //draw lane lines
-        for(let i=1; i <= this.laneCount-1; i++){
-            const x = lerp(this.left, this.right, i/this.laneCount);
-            
-            ctx.setLineDash([20, 20]);
+        ctx.setLineDash([20, 20]);
+        this.lanes.forEach(lane => {
             ctx.beginPath();
-            ctx.moveTo(x, this.top);
-            ctx.lineTo(x, this.bottom);
+            ctx.moveTo(lane[0].x, lane[0].y);
+            ctx.lineTo(lane[1].x, lane[1].y);
             ctx.stroke();
-        }
+        });
+
         //draw borders
         ctx.setLineDash([]);
         this.borders.forEach(border => {

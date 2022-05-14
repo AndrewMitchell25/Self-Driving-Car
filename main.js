@@ -1,23 +1,27 @@
 const carCanvas=document.getElementById("carCanvas");
-carCanvas.width = 200;
+carCanvas.width = window.innerWidth/2;
 
 const networkCanvas=document.getElementById("networkCanvas");
-networkCanvas.width = 300;
+networkCanvas.width = window.innerWidth/2;
 
 const carCtx = carCanvas.getContext("2d");
 const networkCtx = networkCanvas.getContext("2d");
 
 const road = new Road(carCanvas.width/2, carCanvas.width*.9);
 //const car = new Car(road.getLaneCenter(1), 100, 30, 50, "AI");
-const N = 100;
+let N = 1000;
 const cars = generateCars(N);
 
+let highGraphics = true;
+
 let bestCar = cars[0];
+
+let M = 0.1;
 if(localStorage.getItem("bestBrain")){
     for(let i = 0; i < cars.length; i++){
         cars[i].brain=JSON.parse(localStorage.getItem("bestBrain"));
         if(i!=0){
-            NeuralNetwork.mutate(cars[i].brain, 0.1);
+            NeuralNetwork.mutate(cars[i].brain, M);
         }
     }
 }
@@ -32,16 +36,9 @@ const traffic = [
     new Car(road.getLaneCenter(2), -700, 30, 50, "DUMMY",2, getRandomColor()),
 ];
 
+let play = 0;
 animate();
 
-function save(){
-    localStorage.setItem("bestBrain", JSON.stringify(bestCar.brain));
-    console.log(JSON.stringify(bestCar.brain));
-}
-
-function discard(){
-    localStorage.removeItem("bestBrain");
-}
 
 function generateCars(N){
     const cars = [];
@@ -52,37 +49,70 @@ function generateCars(N){
 }
 
 function animate(time){
-    for(let i = 0; i< traffic.length; i++){
-        traffic[i].update(road.borders, []);
+    if(play%2==0){
+        for(let i = 0; i< traffic.length; i++){
+            traffic[i].update(road.borders, []);
+        }
+
+        for(let i = 0; i < cars.length; i++){
+            cars[i].update(road.borders, traffic);
+        }
+        //find the car that's the furthest 
+        bestCar = cars.find(c=>c.y==Math.min(...cars.map(c=>c.y)));
+
+        carCanvas.height = window.innerHeight;
+        networkCanvas.height = window.innerHeight;
+        
+        carCtx.save();
+        carCtx.translate(0, -bestCar.y+carCanvas.height*0.7);
+        
+        road.draw(carCtx);
+        for(let i = 0; i< traffic.length; i++){
+            traffic[i].draw(carCtx, highGraphics);
+        }
+        carCtx.globalAlpha = 0.2;
+        for(let i = 0; i < cars.length; i++){
+            cars[i].draw(carCtx, highGraphics);
+        }
+        carCtx.globalAlpha = 1;
+        //draw one car full opacity
+        bestCar.draw(carCtx, highGraphics, true);
+
+        carCtx.restore();
+
+        networkCtx.lineDashOffset = -time/50;
+        Visualizer.drawNetwork(networkCtx, bestCar.brain);
     }
-
-    for(let i = 0; i < cars.length; i++){
-        cars[i].update(road.borders, traffic);
-    }
-    //find the car that's the furthest 
-    bestCar = cars.find(c=>c.y==Math.min(...cars.map(c=>c.y)));
-
-    carCanvas.height = window.innerHeight;
-    networkCanvas.height = window.innerHeight;
-
-    carCtx.save();
-    carCtx.translate(0, -bestCar.y+carCanvas.height*0.7);
-
-    road.draw(carCtx);
-    for(let i = 0; i< traffic.length; i++){
-        traffic[i].draw(carCtx);
-    }
-    carCtx.globalAlpha = 0.2;
-    for(let i = 0; i < cars.length; i++){
-        cars[i].draw(carCtx);
-    }
-    carCtx.globalAlpha = 1;
-    //draw one car full opacity
-    bestCar.draw(carCtx, "blue", true);
-
-    carCtx.restore();
-
-    networkCtx.lineDashOffset = -time/50;
-    Visualizer.drawNetwork(networkCtx, bestCar.brain);
     requestAnimationFrame(animate);
+    
+}
+
+//button functions
+function save(){
+    localStorage.setItem("bestBrain", JSON.stringify(bestCar.brain));
+    console.log(JSON.stringify(bestCar.brain));
+}
+
+function discard(){
+    localStorage.removeItem("bestBrain");
+}
+
+function pause(){
+    play += 1;
+    const pauseButton = document.getElementById("pause");
+    if(play%2==0){
+        pauseButton.textContent = "Pause";
+    } else {
+        pauseButton.textContent = "Play";
+    }
+}
+
+function graphics(){
+    highGraphics = !highGraphics;
+    const graphicsButton = document.getElementById("graphics");
+    if(highGraphics){
+        graphicsButton.textContent = "Low Graphics";
+    } else {
+        graphicsButton.textContent = "High Graphics";
+    }
 }

@@ -1,15 +1,8 @@
 body {
     margin: 0;
     background: darkgray;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#verticalButtons{
-    display: flex;
-    flex-direction: column;
+    font-family: 'Josefin Sans', sans-serif;
+    font-style: normal;
 }
 
 button{
@@ -29,4 +22,46 @@ button:hover{
 
 #networkCanvas{
     background: black;
+}
+
+.navbar{
+    position: relative;
+    height: 60px;
+    width: 100%;
+    background-color: black;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-list{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar-items{
+    float: left;
+}
+
+.navbar-link{
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+.navbar-link:hover{
+    background-color: #111;
+}
+
+.canvases {
+    position: relative;
+    height: 90vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
 }

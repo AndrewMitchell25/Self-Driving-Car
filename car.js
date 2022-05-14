@@ -19,6 +19,7 @@ class Car{
         }
         this.controls = new Controls(controlType);
 
+        this.color = color;
         this.img = new Image();
         this.img.src = "car.png";
         //color the image
@@ -130,20 +131,34 @@ class Car{
         this.y -= Math.cos(this.angle)*this.speed;
     }
 
-    draw(ctx, drawSensor = false){
+    draw(ctx, highGraphics, drawSensor = false){
         if(this.sensor && drawSensor){
             //draw the sensor
             this.sensor.draw(ctx);
         }
-
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(-this.angle);
-        if(!this.damaged){
-            ctx.drawImage(this.mask, -this.width/2, -this.height/2, this.width, this.height);
-            ctx.globalCompositeOperation = "multiply";
+        if(highGraphics){
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(-this.angle);
+            if(!this.damaged){
+                ctx.drawImage(this.mask,  -this.width/2-this.width*.15, -this.height/2-this.height*.15, this.width+this.width*.3, this.height+this.height*.3);
+                ctx.globalCompositeOperation = "multiply";
+            }
+            ctx.drawImage(this.img, -this.width/2-this.width*.15, -this.height/2-this.height*.15, this.width+this.width*.3, this.height+this.height*.3);
+            ctx.restore();
+        } else {
+            if(this.damaged){
+                ctx.fillStyle="gray";
+            } else {
+                ctx.fillStyle= this.color;
+            }
+    
+            ctx.beginPath();
+            ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
+            for(let i = 0; i < this.polygon.length; i++){
+                ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
+            }
+            ctx.fill();
         }
-        ctx.drawImage(this.img, -this.width/2, -this.height/2, this.width, this.height);
-        ctx.restore();
-    }
+    } 
 }

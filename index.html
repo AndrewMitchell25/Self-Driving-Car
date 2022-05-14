@@ -4,16 +4,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" type="text/css" href="style.css">
     <title>Self-Driving Car</title>
 </head>
 <body>
-    <canvas id="carCanvas"></canvas>
-    <div id="verticalButtons">
-        <button onclick="save()">Save</button>
-        <button onclick="discard()">Trash</button>
+    <nav class="navbar">
+        <ul class="navbar-list">
+            <li class="navbar-items"><a class="navbar-link" href="default.asp">Home</a></li>
+            <li class="navbar-items"><a class="navbar-link" href="news.asp">News</a></li>
+            <button onclick="save()">Save</button>
+            <button onclick="discard()">Trash</button>
+            <button onclick="pause()" id="pause">Pause</button>
+            <button onclick="graphics()" id="graphics">Low Graphics</button>
+        </ul>
+    </nav>
+    <div class="canvases">
+        <canvas id="carCanvas"></canvas>
+        <canvas id="networkCanvas"></canvas>
     </div>
-    <canvas id="networkCanvas"></canvas>
     <script src="visualizer.js"></script>
     <script src="network.js"></script>
     <script src="sensor.js"></script>
