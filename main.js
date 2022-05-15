@@ -9,6 +9,8 @@ let bestCar;
 let road;
 let play;
 let cars;
+let M = 0.1;
+let N = 100;
 
 initialize();
 
@@ -19,14 +21,13 @@ function initialize(){
     
     road = new Road(carCanvas.width/2, carCanvas.width*.9);
     //const car = new Car(road.getLaneCenter(1), 100, 30, 50, "AI");
-    let N = 1;
     cars = generateCars(N);
 
 
     bestCar = cars[0];
 
-    let M = 0.1;
     if(localStorage.getItem("bestBrain")){
+        console.log(localStorage.getItem("bestBrain"));
         for(let i = 0; i < cars.length; i++){
             cars[i].brain=JSON.parse(localStorage.getItem("bestBrain"));
             if(i!=0){
@@ -126,9 +127,21 @@ function graphics(){
     }
 }
 
-function restart(){
+function nextGen(){
     play = 1;
     cancelAnimationFrame(animate);
     initialize();
     play = 0;
+}
+
+function restart(){
+    
+}
+
+function setM(m){
+    M = m;
+}
+
+function setN(n){
+    N = n;
 }
