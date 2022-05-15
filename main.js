@@ -1,44 +1,53 @@
 const carCanvas=document.getElementById("carCanvas");
-carCanvas.width = window.innerWidth/2;
-
 const networkCanvas=document.getElementById("networkCanvas");
-networkCanvas.width = window.innerWidth/2;
-
 const carCtx = carCanvas.getContext("2d");
 const networkCtx = networkCanvas.getContext("2d");
 
-const road = new Road(carCanvas.width/2, carCanvas.width*.9);
-//const car = new Car(road.getLaneCenter(1), 100, 30, 50, "AI");
-let N = 1000;
-const cars = generateCars(N);
-
+let traffic;
 let highGraphics = true;
+let bestCar;
+let road;
+let play;
+let cars;
 
-let bestCar = cars[0];
+initialize();
 
-let M = 0.1;
-if(localStorage.getItem("bestBrain")){
-    for(let i = 0; i < cars.length; i++){
-        cars[i].brain=JSON.parse(localStorage.getItem("bestBrain"));
-        if(i!=0){
-            NeuralNetwork.mutate(cars[i].brain, M);
+function initialize(){
+    carCanvas.width = window.innerWidth/2;
+
+    networkCanvas.width = window.innerWidth/2;
+    
+    road = new Road(carCanvas.width/2, carCanvas.width*.9);
+    //const car = new Car(road.getLaneCenter(1), 100, 30, 50, "AI");
+    let N = 1;
+    cars = generateCars(N);
+
+
+    bestCar = cars[0];
+
+    let M = 0.1;
+    if(localStorage.getItem("bestBrain")){
+        for(let i = 0; i < cars.length; i++){
+            cars[i].brain=JSON.parse(localStorage.getItem("bestBrain"));
+            if(i!=0){
+                NeuralNetwork.mutate(cars[i].brain, M);
+            }
         }
     }
+
+    traffic = [
+        new Car(road.getLaneCenter(1), -100, 30, 50, "DUMMY",2, getRandomColor()),
+        new Car(road.getLaneCenter(0), -300, 30, 50, "DUMMY",2, getRandomColor()),
+        new Car(road.getLaneCenter(2), -300, 30, 50, "DUMMY",2, getRandomColor()),
+        new Car(road.getLaneCenter(1), -500, 30, 50, "DUMMY",2, getRandomColor()),
+        new Car(road.getLaneCenter(0), -500, 30, 50, "DUMMY",2, getRandomColor()),
+        new Car(road.getLaneCenter(1), -700, 30, 50, "DUMMY",2, getRandomColor()),
+        new Car(road.getLaneCenter(2), -700, 30, 50, "DUMMY",2, getRandomColor()),
+    ];
+
+    play = 0;
+    animate();
 }
-
-const traffic = [
-    new Car(road.getLaneCenter(1), -100, 30, 50, "DUMMY",2, getRandomColor()),
-    new Car(road.getLaneCenter(0), -300, 30, 50, "DUMMY",2, getRandomColor()),
-    new Car(road.getLaneCenter(2), -300, 30, 50, "DUMMY",2, getRandomColor()),
-    new Car(road.getLaneCenter(1), -500, 30, 50, "DUMMY",2, getRandomColor()),
-    new Car(road.getLaneCenter(0), -500, 30, 50, "DUMMY",2, getRandomColor()),
-    new Car(road.getLaneCenter(1), -700, 30, 50, "DUMMY",2, getRandomColor()),
-    new Car(road.getLaneCenter(2), -700, 30, 50, "DUMMY",2, getRandomColor()),
-];
-
-let play = 0;
-animate();
-
 
 function generateCars(N){
     const cars = [];
@@ -82,9 +91,8 @@ function animate(time){
 
         networkCtx.lineDashOffset = -time/50;
         Visualizer.drawNetwork(networkCtx, bestCar.brain);
+        requestAnimationFrame(animate);
     }
-    requestAnimationFrame(animate);
-    
 }
 
 //button functions
@@ -105,6 +113,7 @@ function pause(){
     } else {
         pauseButton.textContent = "Play";
     }
+    animate();
 }
 
 function graphics(){
@@ -115,4 +124,11 @@ function graphics(){
     } else {
         graphicsButton.textContent = "High Graphics";
     }
+}
+
+function restart(){
+    play = 1;
+    cancelAnimationFrame(animate);
+    initialize();
+    play = 0;
 }
