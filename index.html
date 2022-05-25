@@ -15,9 +15,10 @@
     <nav class="navbar">
         <ul class="navbar-list">
             <a class="navbar-text navbar-items">Self-Driving Car</a></li>
-            <button class="navbar-button navbar-items" onclick="save()">Save</button></li>
-            <button class="navbar-button navbar-items" onclick="discard()">Trash</button>
+            <button class="navbar-button navbar-items" onclick="save()" id="save">Save</button></li>
+            <button class="navbar-button navbar-items" onclick="discard()" id="discard">Trash</button>
             <button class="navbar-button navbar-items" onclick="pause()" id="pause">Pause</button>
+            <button class="navbar-button navbar-items" onclick="switchMode()" id="switchMode">Switch Mode</button>
             <!--<button class="navbar-button navbar-items" onclick="graphics()" id="graphics">Low Graphics</button>-->
             <div class="navbar-text navbar-items">
                 <input type="checkbox" id="graphics" name="graphics" onchange="graphics()"></input>
@@ -52,6 +53,11 @@
         <canvas id="carCanvas"></canvas>
         <canvas id="networkCanvas"></canvas>
     </div>
+    <div class="display">
+        <h2 id="genNum">Generation 0</h2>
+    </div>
+
+
     <script src="visualizer.js"></script>
     <script src="network.js"></script>
     <script src="sensor.js"></script>

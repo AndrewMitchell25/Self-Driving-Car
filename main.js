@@ -11,6 +11,10 @@ let play;
 let cars;
 let M = 0.1;
 let N = 100;
+let laneCount = 3;
+let mode = "MANUAL";
+let gen = 0;
+let genNum = 0;
 
 initialize();
 
@@ -19,15 +23,19 @@ function initialize(){
 
     networkCanvas.width = window.innerWidth/2;
     
-    road = new Road(carCanvas.width/2, carCanvas.width*.9);
+    road = new Road(carCanvas.width/2, carCanvas.width*.9, laneCount);
     //const car = new Car(road.getLaneCenter(1), 100, 30, 50, "AI");
     cars = generateCars(N);
+
+    //display info
+    genNum += 1;
+    document.getElementById("genNum").textContent = "Generation " + genNum;
+
 
 
     bestCar = cars[0];
 
     if(localStorage.getItem("bestBrain")){
-        console.log(localStorage.getItem("bestBrain"));
         for(let i = 0; i < cars.length; i++){
             cars[i].brain=JSON.parse(localStorage.getItem("bestBrain"));
             if(i!=0){
@@ -45,9 +53,19 @@ function initialize(){
         new Car(road.getLaneCenter(1), -700, 30, 50, "DUMMY",2, getRandomColor()),
         new Car(road.getLaneCenter(2), -700, 30, 50, "DUMMY",2, getRandomColor()),
     ];
+    //UI Stuff
+    document.getElementById("pause").textContent = "Pause"
+    if(mode == "MANUAL"){
+        document.getElementById("save").style.display = "block";
+        document.getElementById("discard").style.display = "block";
+    } else if(mode == "AUTO"){
+        document.getElementById("save").style.display = "none";
+        document.getElementById("discard").style.display = "none";
+    }
 
     play = 0;
-    animate();
+    gen = 0;
+    requestAnimationFrame(animate);
 }
 
 function generateCars(N){
@@ -59,42 +77,59 @@ function generateCars(N){
 }
 
 function animate(time){
-    if(play%2==0){
-        for(let i = 0; i< traffic.length; i++){
-            traffic[i].update(road.borders, []);
-        }
-
-        for(let i = 0; i < cars.length; i++){
-            cars[i].update(road.borders, traffic);
-        }
-        //find the car that's the furthest 
+    for(let i = 0; i< traffic.length; i++){
+        traffic[i].update(road.borders, []);
+    }
+    
+    for(let i = 0; i < cars.length; i++){
+        cars[i].update(road.borders, traffic);
+    }
+    //find the car that's the furthest 
+    if(mode == "MANUAL"){
         bestCar = cars.find(c=>c.y==Math.min(...cars.map(c=>c.y)));
-
-        carCanvas.height = window.innerHeight;
-        networkCanvas.height = window.innerHeight;
-        
-        carCtx.save();
-        carCtx.translate(0, -bestCar.y+carCanvas.height*0.7);
-        
-        road.draw(carCtx);
-        for(let i = 0; i< traffic.length; i++){
-            traffic[i].draw(carCtx, highGraphics);
-        }
-        carCtx.globalAlpha = 0.2;
-        for(let i = 0; i < cars.length; i++){
-            cars[i].draw(carCtx, highGraphics);
-        }
-        carCtx.globalAlpha = 1;
-        //draw one car full opacity
-        bestCar.draw(carCtx, highGraphics, true);
-
-        carCtx.restore();
-
-        networkCtx.lineDashOffset = -time/50;
-        Visualizer.drawNetwork(networkCtx, bestCar.brain);
+    } else if(mode =="AUTO"){
+        bestCar = fitness(cars);
+    }
+    
+    
+    carCanvas.height = window.innerHeight;
+    networkCanvas.height = window.innerHeight;
+    
+    carCtx.save();
+    carCtx.translate(0, -bestCar.y+carCanvas.height*0.7);
+    
+    road.draw(carCtx);
+    for(let i = 0; i< traffic.length; i++){
+        traffic[i].draw(carCtx, highGraphics);
+    }
+    carCtx.globalAlpha = 0.2;
+    for(let i = 0; i < cars.length; i++){
+        cars[i].draw(carCtx, highGraphics);
+    }
+    carCtx.globalAlpha = 1;
+    //draw best car full opacity
+    bestCar.draw(carCtx, highGraphics, true);
+    
+    carCtx.restore();
+    
+    networkCtx.lineDashOffset = -time/50;
+    Visualizer.drawNetwork(networkCtx, bestCar.brain);
+    if(play%2==0 && gen == 0){
         requestAnimationFrame(animate);
     }
+    if(gen == 1){
+        initialize();
+    }
 }
+
+
+function fitness(cars){
+    for(let i = 0; i < cars.length; i++){
+        
+    }
+    return cars.find(c=>c.y==Math.min(...cars.map(c=>c.y)));
+}
+
 
 //button functions
 function save(){
@@ -114,7 +149,7 @@ function pause(){
     } else {
         pauseButton.textContent = "Play";
     }
-    animate();
+    requestAnimationFrame(animate);
 }
 
 function graphics(){
@@ -128,10 +163,7 @@ function graphics(){
 }
 
 function nextGen(){
-    play = 1;
-    cancelAnimationFrame(animate);
-    initialize();
-    play = 0;
+    gen = 1;
 }
 
 function restart(){
@@ -144,4 +176,13 @@ function setM(m){
 
 function setN(n){
     N = n;
+}
+
+function switchMode(){
+    if(mode == "MANUAL"){
+        mode = "AUTO";
+    } else if(mode == "AUTO"){
+        mode = "MANUAL";
+    }
+    console.log(mode);
 }
